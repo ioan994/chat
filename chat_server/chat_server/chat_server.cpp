@@ -13,11 +13,13 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
+#include "chat.h"
+#include "chat_participant.h"
+
 using namespace boost::asio;
 
 class server
 {
-
 public:
    server(unsigned port_number) : acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port_number))
    {
@@ -34,10 +36,17 @@ public:
       if (started_) return;
 
       started_ = true;
-      listener_thread = std::thread([this]()
+      listener_thread_ = std::thread([this]()
       {
-         accept_next();
-         io_service_.run();
+         try
+         {
+            accept_next();
+            io_service_.run();
+         }
+         catch (std::exception& e)
+         {
+            std::cerr << "Exception occured in listener thread: " << e.what()<<std::endl;
+         }
       });
    }
 
@@ -47,7 +56,7 @@ public:
 
       started_ = false;
       io_service_.stop();
-      listener_thread.join();
+      listener_thread_.join();
    }
 
 private:
@@ -58,16 +67,11 @@ private:
       acceptor_.async_accept(*socketPtr, [this, socketPtr](const boost::system::error_code& error){ handle_connection(error, socketPtr); });
    }
 
-   std::string make_daytime_string() const
-   {
-      return "test time string";
-   }
-
    void handle_connection(const boost::system::error_code& error, std::shared_ptr<ip::tcp::socket> socket)
    {
       if (!error)
       {
-         write(*socket, buffer(make_daytime_string()));
+         chat_room_.add(socket);
       }
       accept_next();
    }
@@ -75,7 +79,8 @@ private:
    bool started_ = false;
    io_service io_service_;
    ip::tcp::acceptor acceptor_;
-   std::thread listener_thread;
+   chat chat_room_;
+   std::thread listener_thread_;
 };
 
 
