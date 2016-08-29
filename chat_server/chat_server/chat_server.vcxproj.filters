@@ -30,6 +30,9 @@
     <ClInclude Include="chat_participant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="message_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

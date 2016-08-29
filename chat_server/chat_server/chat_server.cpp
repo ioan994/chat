@@ -67,11 +67,11 @@ private:
       acceptor_.async_accept(*socketPtr, [this, socketPtr](const boost::system::error_code& error){ handle_connection(error, socketPtr); });
    }
 
-   void handle_connection(const boost::system::error_code& error, std::shared_ptr<ip::tcp::socket> socket)
+   void handle_connection(const boost::system::error_code& error, const std::shared_ptr<ip::tcp::socket>& socket)
    {
       if (!error)
       {
-         chat_room_.add(socket);
+         chat_room_.add(std::move(*socket));
       }
       accept_next();
    }

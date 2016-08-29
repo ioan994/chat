@@ -7,11 +7,12 @@
 #include <boost/array.hpp>
 
 #include "chat.h"
+#include "chat_participant.h"
 
-void chat::add(const std::shared_ptr<boost::asio::ip::tcp::socket>& socket)
+void chat::add(boost::asio::ip::tcp::socket socket)
 {
-   connections_.emplace_back(std::make_unique<chat_participant>(*this, socket));
-   connections_.back()->read_header();
+   connections_.emplace_back(std::make_unique<chat_participant>(*this, std::move(socket)));
+   connections_.back()->start_reading_messages();
 }
 
 void chat::remove_participant(const chat_participant& participant)

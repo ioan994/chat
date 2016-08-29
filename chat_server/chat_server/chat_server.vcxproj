@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="chat.h" />
     <ClInclude Include="chat_participant.h" />
+    <ClInclude Include="message_handler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
