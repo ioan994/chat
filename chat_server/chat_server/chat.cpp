@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <iostream>
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -20,4 +21,13 @@ void chat::remove_participant(const chat_participant& participant)
    connections_.erase(std::remove_if(begin(connections_), end(connections_),
       [&participant](const std::unique_ptr<chat_participant>& other) { return other.get() == &participant; }),
       end(connections_));
+}
+
+void chat::message_received(const std::string& message, const chat_participant& source)
+{
+   std::cout << "message received: " << &source <<" "<< message << "\n";
+   for (auto& participant : connections_)
+   {
+      if (&source != participant.get()) participant->send_message(message);
+   }
 }

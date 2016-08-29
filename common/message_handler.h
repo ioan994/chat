@@ -11,10 +11,12 @@ namespace
       return *((int*)data.data());
    }
 
-   std::string encode_int(int val)
+   std::vector<char> encode_int(int val)
    {
+      std::vector<char> vector(sizeof(int));
       char* encoded = (char*)&val;
-      return encoded;
+      memcpy(vector.data(), encoded, sizeof(int));
+      return vector;
    }
 }
 
@@ -31,31 +33,39 @@ public:
       receive_header(callback);
    }
 
-   void async_send_message(const std::string& message)
+   template <class SendMessageCallback>
+   void async_send_message(const std::string& message, const SendMessageCallback& callback)
    {
       message_to_send_ = message;
-      send_header();
+      send_header(callback);
    }
 
 private:
 
-   void send_header()
+   template <class SendMessageCallback>
+   void send_header(const SendMessageCallback& callback)
    {
+      message_to_send_header_ = encode_int(message_to_send_.size());
       boost::asio::async_write(socket_,
-         boost::asio::buffer(encode_int(message_to_send_.size())),
-         [this](boost::system::error_code ec, std::size_t /*length*/)
+         boost::asio::buffer(message_to_send_header_),
+         [this, callback](boost::system::error_code ec, std::size_t /*length*/)
       {
          if (!ec)
          {
-            send_body();
+            send_body(callback);
+         }
+         else
+         {
+            callback(false);
          }
       });
    }
 
-   void send_body()
+   template <class SendMessageCallback>
+   void send_body(const SendMessageCallback& callback)
    {
       boost::asio::async_write(socket_,
-         boost::asio::buffer(message_to_send_), [](boost::system::error_code, std::size_t /*length*/) {});
+         boost::asio::buffer(message_to_send_), [callback](boost::system::error_code ec, std::size_t /*length*/) {callback(!ec); });
    }
 
    template<class MessageCallback>
@@ -97,6 +107,7 @@ private:
    }
 
    boost::asio::ip::tcp::socket socket_;
+   std::vector<char> message_to_send_header_;
    std::string message_to_send_;
    std::vector<char> message_to_receive_body_;
    std::vector<char> meesage_to_receive_header_;

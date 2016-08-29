@@ -18,8 +18,11 @@ public:
    chat_participant& operator = (const chat_participant&) = delete;
 
    void start_reading_messages();
+   void send_message(const std::string& message);
 
 private:
+
+   void read_next_message();
 
    chat& chatRoom_;
    message_handler messanger_;
