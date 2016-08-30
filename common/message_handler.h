@@ -45,7 +45,7 @@ private:
    template <class SendMessageCallback>
    void send_header(const SendMessageCallback& callback)
    {
-      message_to_send_header_ = encode_int(message_to_send_.size());
+      message_to_send_header_ = encode_int(static_cast<int>(message_to_send_.size()));
       boost::asio::async_write(socket_,
          boost::asio::buffer(message_to_send_header_),
          [this, callback](boost::system::error_code ec, std::size_t /*length*/)
