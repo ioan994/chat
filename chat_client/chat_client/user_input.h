@@ -11,7 +11,7 @@ public:
 
    void char_entered(char c);
 
-   const std::string& get_input();
+   const std::string& get_input() const;
 
 private:
 

@@ -30,7 +30,7 @@ void user_input::char_entered(char c)
    }
 }
 
-const std::string& user_input::get_input()
+const std::string& user_input::get_input() const
 {
    return input_;
 }
