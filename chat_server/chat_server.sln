@@ -39,7 +39,7 @@ Global
 		{D640E21E-20C9-4FB6-8C9C-E08C990DE3ED}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{D640E21E-20C9-4FB6-8C9C-E08C990DE3ED}.Release|Win32.ActiveCfg = Release|Win32
 		{D640E21E-20C9-4FB6-8C9C-E08C990DE3ED}.Release|Win32.Build.0 = Release|Win32
-		{D640E21E-20C9-4FB6-8C9C-E08C990DE3ED}.Release|x64.ActiveCfg = Release|Win32
+		{D640E21E-20C9-4FB6-8C9C-E08C990DE3ED}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
