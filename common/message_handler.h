@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <queue>
 
 #include <boost/asio.hpp>
 
@@ -22,8 +23,9 @@ public:
    template <class SendMessageCallback>
    void async_send_message(const std::string& msg, const SendMessageCallback& callback)
    {
-      message_to_send_ = message(msg);
-      send_header(callback);
+      messages_to_send_.emplace(msg);
+      if (messages_to_send_.size() == 1)
+         send_header(callback);
    }
 
 private:
@@ -32,7 +34,7 @@ private:
    void send_header(const SendMessageCallback& callback)
    {
       boost::asio::async_write(socket_,
-         boost::asio::buffer(message_to_send_.get_header_buffer()),
+         boost::asio::buffer(messages_to_send_.front().get_header_buffer()),
          [this, callback](boost::system::error_code ec, std::size_t /*length*/)
       {
          if (!ec)
@@ -50,7 +52,13 @@ private:
    void send_body(const SendMessageCallback& callback)
    {
       boost::asio::async_write(socket_,
-         boost::asio::buffer(message_to_send_.get_body_buffer()), [callback](boost::system::error_code ec, std::size_t /*length*/) {callback(!ec); });
+         boost::asio::buffer(messages_to_send_.front().get_body_buffer()), [this, callback](boost::system::error_code ec, std::size_t /*length*/)
+      {
+         callback(!ec);
+         messages_to_send_.pop();
+         if (!messages_to_send_.empty())
+            send_header(callback);
+      });
    }
 
    template<class MessageCallback>
@@ -89,7 +97,8 @@ private:
       });
    }
 
+private:
    boost::asio::ip::tcp::socket socket_;
-   message message_to_send_;
+   std::queue<message> messages_to_send_;
    message message_to_receive_;
 };
