@@ -22,10 +22,10 @@ void console_ui::start_listening_keystrokes()
       user_input_.char_entered(_getch());
 }
 
-void console_ui::on_message(const std::string& message) const
+void console_ui::on_message(const std::string& username, const std::string& message) const
 {
    std::unique_lock<std::mutex> lock(console_mutex_);
-   output_without_interrupting_user_input("anonymous: " + message + "\n");
+   output_without_interrupting_user_input(username + ": " + message + "\n");
 }
 
 void console_ui::on_error(const std::string& message) const

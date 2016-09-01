@@ -4,21 +4,7 @@
 
 #include <boost/asio.hpp>
 
-namespace
-{
-   int decode_int(const std::vector<char>& data)
-   {
-      return *((int*)data.data());
-   }
-
-   std::vector<char> encode_int(int val)
-   {
-      std::vector<char> vector(sizeof(int));
-      char* encoded = (char*)&val;
-      memcpy(vector.data(), encoded, sizeof(int));
-      return vector;
-   }
-}
+#include "message.h"
 
 class message_handler
 {
@@ -34,9 +20,9 @@ public:
    }
 
    template <class SendMessageCallback>
-   void async_send_message(const std::string& message, const SendMessageCallback& callback)
+   void async_send_message(const std::string& msg, const SendMessageCallback& callback)
    {
-      message_to_send_ = message;
+      message_to_send_ = message(msg);
       send_header(callback);
    }
 
@@ -45,9 +31,8 @@ private:
    template <class SendMessageCallback>
    void send_header(const SendMessageCallback& callback)
    {
-      message_to_send_header_ = encode_int(static_cast<int>(message_to_send_.size()));
       boost::asio::async_write(socket_,
-         boost::asio::buffer(message_to_send_header_),
+         boost::asio::buffer(message_to_send_.get_header_buffer()),
          [this, callback](boost::system::error_code ec, std::size_t /*length*/)
       {
          if (!ec)
@@ -65,15 +50,14 @@ private:
    void send_body(const SendMessageCallback& callback)
    {
       boost::asio::async_write(socket_,
-         boost::asio::buffer(message_to_send_), [callback](boost::system::error_code ec, std::size_t /*length*/) {callback(!ec); });
+         boost::asio::buffer(message_to_send_.get_body_buffer()), [callback](boost::system::error_code ec, std::size_t /*length*/) {callback(!ec); });
    }
 
    template<class MessageCallback>
    void receive_header(const MessageCallback& callback)
    {
-      meesage_to_receive_header_.resize(sizeof(int));
       boost::asio::async_read(socket_,
-         boost::asio::buffer(meesage_to_receive_header_),
+         boost::asio::buffer(message_to_receive_.get_header_buffer()),
          [this, callback](boost::system::error_code ec, std::size_t /*length*/)
       {
          if (!ec)
@@ -90,14 +74,13 @@ private:
    template<class MessageCallback>
    void receive_body(const MessageCallback& callback)
    {
-      message_to_receive_body_.resize(decode_int(meesage_to_receive_header_));
+      message_to_receive_.prepare_body_for_reading();
       boost::asio::async_read(socket_,
-         boost::asio::buffer(message_to_receive_body_), [this, callback](boost::system::error_code ec, std::size_t /*length*/)
+         boost::asio::buffer(message_to_receive_.get_body_buffer()), [this, callback](boost::system::error_code ec, std::size_t /*length*/)
       {
          if (!ec)
          {
-            message_to_receive_body_.push_back('\0');
-            callback(true, std::string(message_to_receive_body_.data()));
+            callback(true, message_to_receive_.get_body_string());
          }
          else
          {
@@ -107,8 +90,6 @@ private:
    }
 
    boost::asio::ip::tcp::socket socket_;
-   std::vector<char> message_to_send_header_;
-   std::string message_to_send_;
-   std::vector<char> message_to_receive_body_;
-   std::vector<char> meesage_to_receive_header_;
+   message message_to_send_;
+   message message_to_receive_;
 };

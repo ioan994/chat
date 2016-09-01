@@ -63,3 +63,12 @@ chat_client/ipch/
 common/x64/
 chat_server/x64/
 chat_server/ipch/
+boost_1_56_0_x86
+chat_client/chat_client/Release/
+chat_client/Release/
+chat_server/chat_server/Release/
+chat_server/Release/
+common/messages/generated/
+common/Release/
+protobuf
+3rdParty

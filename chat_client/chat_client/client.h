@@ -10,20 +10,20 @@ class ui;
 class client
 {
 public:
-   client(ui& interface, const boost::asio::ip::tcp::endpoint& endpoint);
+   client(ui& interface, const std::string& username, const boost::asio::ip::tcp::endpoint& server_endpoint);
 
    ~client();
 
-   void start(const boost::asio::ip::tcp::endpoint& endpoint);
-
    void send(const std::string& message);
-   void stop();
 
 private:
 
+   void start(const boost::asio::ip::tcp::endpoint& endpoint);
+   void stop();
    void receive();
    void do_send(const std::string& message);
 
+   std::string username_;
    bool started_ = false;
    ui& interface_;
    boost::asio::io_service io_service_;

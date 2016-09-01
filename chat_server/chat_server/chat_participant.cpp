@@ -15,11 +15,6 @@ chat_participant::chat_participant(chat& chat_room, boost::asio::ip::tcp::socket
 {
 }
 
-void chat_participant::start_reading_messages()
-{
-   read_next_message();
-}
-
 void chat_participant::send_message(const std::string& message)
 {
    auto& chatRoom = chatRoom_;
@@ -30,6 +25,11 @@ void chat_participant::send_message(const std::string& message)
          chatRoom.remove_participant(*this);
       }
    });
+}
+
+void chat_participant::start_reading_messages()
+{
+   read_next_message();
 }
 
 void chat_participant::read_next_message()

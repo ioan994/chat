@@ -5,11 +5,13 @@
 
 #include "client.h"
 
+#include "messages/generated/string_message.pb.cc"
+
 using namespace boost::asio;
 
-client::client(ui& interface, const ip::tcp::endpoint& endpoint) : interface_{ interface }
+client::client(ui& interface, const std::string& username, const ip::tcp::endpoint& server_endpoint) : interface_{ interface }, username_( username )
 {
-   start(endpoint);
+   start(server_endpoint);
 }
 
 client::~client()
@@ -60,7 +62,10 @@ void client::receive()
    {
       if (result)
       {
-         interface_.on_message(message);
+         StringMessage sm;
+         sm.ParseFromString(message);
+
+         interface_.on_message(sm.username(), sm.message());
          receive();
       }
       else
@@ -72,7 +77,10 @@ void client::receive()
 
 void client::do_send(const std::string& message)
 {
-   messanger_->async_send_message(message, [this](bool result)
+   StringMessage sm;
+   sm.set_username(username_);
+   sm.set_message(message);
+   messanger_->async_send_message(sm.SerializeAsString(), [this](bool result)
    {
       if (!result)
       {

@@ -15,7 +15,7 @@ public:
    void clear_previous_chars(unsigned count) const;
    void on_user_edit_message(const std::string& message_before, const std::string& user_edited_message) const;
 
-   virtual void on_message(const std::string& message) const override;
+   virtual void on_message(const std::string& username, const std::string& message) const override;
    virtual void on_error(const std::string& message) const override;
    virtual void on_user_send_message(const std::string& user_sent_message) const override;
 
